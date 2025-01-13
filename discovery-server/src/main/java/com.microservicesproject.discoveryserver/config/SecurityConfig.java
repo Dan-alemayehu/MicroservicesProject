@@ -3,7 +3,10 @@ package com.microservicesproject.discoveryserver.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -12,7 +15,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-public class SecurityConfig{
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Value("${eureka.username}")
     private String username;
@@ -20,32 +24,49 @@ public class SecurityConfig{
     @Value("${eureka.password}")
     private String password;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for non-browser clients
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/eureka/**").permitAll() // Allow access to Eureka endpoints
-                        .anyRequest().authenticated() // Require authentication for all other requests
-                )
-                .httpBasic(httpBasic -> {}); // Enable HTTP Basic authentication
-
-        return http.build();
+    @Override
+    public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+        authenticationManagerBuilder.inMemoryAuthentication()
+                .passwordEncoder(NoOpPasswordEncoder.getInstance())
+                .withUser(username).password(password)
+                .authorities("USER");
     }
 
-    @Bean
-    public InMemoryUserDetailsManager userDetailsService() {
-        UserDetails user = User
-                .withUsername(username)
-                .password(passwordEncoder().encode(password))
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
+    @Override
+    public void configure(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.csrf().disable()
+                .authorizeRequests().anyRequest()
+                .authenticated()
+                .and()
+                .httpBasic();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance(); // Use a simple password encoder for testing
-    }
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf(csrf -> csrf.disable()) // Disable CSRF for non-browser clients
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/", "/eureka/**").permitAll() // Allow access to Eureka endpoints
+//                        .anyRequest().authenticated() // Require authentication for all other requests
+//                )
+//                .httpBasic(httpBasic -> {}); // Enable HTTP Basic authentication
+//
+//        return http.build();
+//    }
+//
+//    @Bean
+//    public InMemoryUserDetailsManager userDetailsService() {
+//        UserDetails user = User
+//                .withUsername(username)
+//                .password(passwordEncoder().encode(password))
+//                .roles("USER")
+//                .build();
+//
+//        return new InMemoryUserDetailsManager(user);
+//    }
+//
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return NoOpPasswordEncoder.getInstance(); // Use a simple password encoder for testing
+//    }
 }
