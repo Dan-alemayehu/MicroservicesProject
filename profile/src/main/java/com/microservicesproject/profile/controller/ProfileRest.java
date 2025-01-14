@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/profiles")
+@RequestMapping("/api/profiles")
 @Slf4j
 @RequiredArgsConstructor
 public class ProfileRest {
