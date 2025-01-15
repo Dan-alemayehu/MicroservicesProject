@@ -2,6 +2,7 @@ package com.microservicesproject.profile.controller;
 
 import com.microservicesproject.profile.model.Profile;
 import com.microservicesproject.profile.service.ProfileService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ public class ProfileRest {
     private final ProfileService profileService;
 
     @GetMapping("/{id}")
+    @CircuitBreaker(name = "profile", fallbackMethod = "fallbackMethod")
     public ResponseEntity<Profile> getProfile(@PathVariable Long id) {
         log.info("Get profile with id {}", id);
         return ResponseEntity.ok(profileService.getProfileById(id));
@@ -54,5 +56,10 @@ public class ProfileRest {
     public ResponseEntity<Boolean> usernameExists(@PathVariable String username) {
         log.info("Checking if username {} exists", username);
         return ResponseEntity.ok(profileService.usernameExists(username));
+    }
+
+    //CircuitBreaker FallBack Method
+    public String fallbackMethod(Long id, RuntimeException runtimeException) {
+        return "Oops! Something went wrong!! Please try again after some time";
     }
 }
