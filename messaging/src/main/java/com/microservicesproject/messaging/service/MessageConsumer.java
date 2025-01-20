@@ -2,6 +2,7 @@ package com.microservicesproject.messaging.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microservicesproject.messaging.controller.WebSocketController;
+import com.microservicesproject.messaging.event.SendMessageEvent;
 import com.microservicesproject.messaging.model.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -18,22 +19,22 @@ public class MessageConsumer {
     }
 
     @KafkaListener(topics = "messages", groupId = "messaging-group")
-    public void consumeMessageEvent(String messageEvent) {
+    public void consumeMessageEvent(SendMessageEvent messageEvent) {
         log.info("Consuming event from Kafka: {}", messageEvent);
 
         // Forward the event to WebSocket clients
-        Message message = parseMessageEvent(messageEvent); // Convert event string to Message object
+        // Convert event string to Message object
+        Message message = mapToMessage(messageEvent);
         webSocketController.sendMessageToClients(message);
     }
 
-    private Message parseMessageEvent(String messageEvent) {
-        // Parse the event string to reconstruct the Message object
-        try{
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(messageEvent, Message.class);
-        } catch (Exception e){
-            throw new RuntimeException("Failed to parse message event", e);
-        }
+    private Message mapToMessage(SendMessageEvent messageEvent) {
+        return Message.builder()
+                .senderId(messageEvent.getSenderId())
+                .content(messageEvent.getContent())
+                .timeStamp(messageEvent.getTimestamp())
+                .build();
     }
+
 }
 

@@ -1,6 +1,7 @@
 package com.microservicesproject.messaging.service.serviceImpl;
 
 import com.microservicesproject.messaging.dto.ProfileDto;
+import com.microservicesproject.messaging.event.SendMessageEvent;
 import com.microservicesproject.messaging.exceptions.ResourceNotFoundException;
 import com.microservicesproject.messaging.feign.ProfileFeignClient;
 import com.microservicesproject.messaging.repository.MessageRepository;
@@ -31,8 +32,10 @@ public class MessageServiceImpl implements MessageService {
 
         ProfileDto senderProfile = profileFeignClient.getProfileById(message.getSenderId());
         ProfileDto receiverProfile = profileFeignClient.getProfileById(message.getReceiverId());
+        log.info("Fetched sender profile: {}", senderProfile);
+        log.info("Fetched receiver profile: {}", receiverProfile);
 
-        if(senderProfile != null || receiverProfile != null) {
+        if(senderProfile == null || receiverProfile == null) {
             throw new ResourceNotFoundException("Sender or Receiver profile not found");
         }
 
@@ -41,8 +44,8 @@ public class MessageServiceImpl implements MessageService {
 
 
         //Send kafka event
-        String event = String.format("Message sent from %s to %s: %s",
-                senderProfile.getUsername(), receiverProfile.getUsername(), savedMessage.getContent());
+        SendMessageEvent event = new SendMessageEvent(message.getSenderId(), message.getContent(), message.getTimeStamp());
+                log.info("Message sent");
         messageProducer.sendMessageEvent(event);
 
         return savedMessage;
@@ -63,19 +66,23 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message updateMessageContent(Long id, String newContent){
-        Message message = messageRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
+    public Message updateMessageContent(Long id, String newContent) {
+        // Find the existing message
+        Message message = messageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Message not found with id: " + id));
+        // Update only the content field
         message.setContent(newContent);
+        // Save the updated message
         return messageRepository.save(message);
     }
+
 
     @Override
     public List<Message> getConversation(Long senderId, Long receiverId){
         ProfileDto senderProfile = profileFeignClient.getProfileById(senderId);
         ProfileDto receiverProfile = profileFeignClient.getProfileById(receiverId);
 
-        if(senderProfile != null || receiverProfile != null) {
+        if(senderProfile == null || receiverProfile == null) {
             throw new ResourceNotFoundException("Sender or Receiver profile not found");
         }
 

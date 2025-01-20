@@ -5,7 +5,7 @@ import com.microservicesproject.messaging.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+//import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/api/messages")
 @Slf4j
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('USER')")
+//@PreAuthorize("hasRole('USER')")
 public class MessagingRest {
 
     private final MessageService messageService;
@@ -34,11 +34,14 @@ public class MessagingRest {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Message> updateMessageContent(@PathVariable Long id, @RequestBody String newContent){
+    public ResponseEntity<Message> updateMessageContent(@PathVariable Long id, @RequestBody Message updatedMessage) {
         log.info("Updating content for message with ID: {}", id);
-        Message updateMessage = messageService.updateMessageContent(id, newContent);
-        return ResponseEntity.ok(updateMessage);
+        // Use only the 'content' field from the request body
+        Message updated = messageService.updateMessageContent(id, updatedMessage.getContent());
+        return ResponseEntity.ok(updated);
     }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMessageById(@PathVariable Long id){

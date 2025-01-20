@@ -1,6 +1,7 @@
 package com.microservicesproject.messaging.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microservicesproject.messaging.event.SendMessageEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -11,16 +12,14 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class MessageProducer {
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, SendMessageEvent> kafkaTemplate;
 
     private static final String TOPIC = "messages";
 
-    public void sendMessageEvent(String message) {
+    public void sendMessageEvent(SendMessageEvent message) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String messageEvent = objectMapper.writeValueAsString(message);
-            log.info("Producing event to Kafka: {}", messageEvent);
-            kafkaTemplate.send(TOPIC, messageEvent);
+            log.info("Producing event to Kafka");
+            kafkaTemplate.send(TOPIC, message);
         } catch (Exception e){
             throw new RuntimeException("Failed to serialize message", e);
         }

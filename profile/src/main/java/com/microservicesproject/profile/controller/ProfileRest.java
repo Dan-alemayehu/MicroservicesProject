@@ -19,8 +19,8 @@ public class ProfileRest {
     private final ProfileService profileService;
 
     @GetMapping("/{id}")
-    @CircuitBreaker(name = "profile", fallbackMethod = "fallbackMethod")
-    public ResponseEntity<Profile> getProfile(@PathVariable Long id) {
+//    @CircuitBreaker(name = "profile", fallbackMethod = "fallbackMethod")
+    public ResponseEntity<Profile> getProfileById(@PathVariable Long id) {
         log.info("Get profile with id {}", id);
         return ResponseEntity.ok(profileService.getProfileById(id));
     }
@@ -59,7 +59,7 @@ public class ProfileRest {
     }
 
     //CircuitBreaker FallBack Method
-    public String fallbackMethod(Long id, RuntimeException runtimeException) {
-        return "Oops! Something went wrong!! Please try again after some time";
-    }
+//    public String fallbackMethod(Long id, RuntimeException runtimeException) {
+//        return "Oops! Something went wrong!! Please try again after some time";
+//    }
 }
