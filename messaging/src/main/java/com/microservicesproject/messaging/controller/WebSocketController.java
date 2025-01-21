@@ -12,7 +12,7 @@ import org.springframework.stereotype.Controller;
 public class WebSocketController {
 
     private final SimpMessagingTemplate messageTemplate;
-
+    //Broadcasts message to all subscribed websocket clients
     public void sendMessageToClients(Message message){
         log.info("Broadcasting message to WebSocket client: {}", message);
 

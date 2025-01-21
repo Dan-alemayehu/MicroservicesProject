@@ -15,7 +15,7 @@ public class MessageProducer {
     private final KafkaTemplate<String, SendMessageEvent> kafkaTemplate;
 
     private static final String TOPIC = "messages";
-
+    //sendMessageEvent method that sends message events to the "messages" topic
     public void sendMessageEvent(SendMessageEvent message) {
         try {
             log.info("Producing event to Kafka");

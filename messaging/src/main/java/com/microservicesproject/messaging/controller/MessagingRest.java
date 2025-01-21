@@ -4,6 +4,7 @@ import com.microservicesproject.messaging.model.Message;
 import com.microservicesproject.messaging.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -51,11 +52,22 @@ public class MessagingRest {
     }
 
     @GetMapping("/conversation/{senderId}/{receiverId}")
-    public ResponseEntity<List<Message>> getConversation(@PathVariable Long senderId, @PathVariable Long receiverId){
+    public ResponseEntity<?> getConversation(
+            @PathVariable Long senderId,
+            @PathVariable Long receiverId) {
         log.info("Fetching conversation between sender ID: {} and receiver ID: {}", senderId, receiverId);
+
         List<Message> conversation = messageService.getConversation(senderId, receiverId);
+
+        if (conversation == null || conversation.isEmpty()) {
+            log.info("No conversation found between sender ID: {} and receiver ID: {}", senderId, receiverId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No conversation exists between the provided users.");
+        }
+
         return ResponseEntity.ok(conversation);
     }
+
 
     @GetMapping("/receiver/{receiverId}")
     public ResponseEntity<List<Message>> getMessagesForReceiver(@PathVariable Long receiverId){

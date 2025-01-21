@@ -17,7 +17,7 @@ public class MessageConsumer {
     public MessageConsumer(WebSocketController webSocketController) {
         this.webSocketController = webSocketController;
     }
-
+    //Kafka listener consuming the "messages" event
     @KafkaListener(topics = "messages", groupId = "messaging-group")
     public void consumeMessageEvent(SendMessageEvent messageEvent) {
         log.info("Consuming event from Kafka: {}", messageEvent);
