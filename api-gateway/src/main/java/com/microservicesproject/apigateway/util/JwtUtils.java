@@ -3,11 +3,13 @@ package com.microservicesproject.apigateway.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
 @Component
+@Slf4j
 public class JwtUtils {
 
     private final String SECRET_KEY = "Y2lzTr83vbI9l8jKEM7P9jPqIQF5s1Ix0Y+mDgqGftE=";
@@ -35,9 +37,25 @@ public class JwtUtils {
     }
 
     private Claims getClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(SECRET_KEY)
+                    .parseClaimsJws(token)
+                    .getBody();
+            log.info("Token Claims: {}", claims); // Log all claims for debugging
+            return claims;
+        } catch (Exception e) {
+            log.error("Error parsing token: {}", token, e);
+            throw e; // Rethrow the exception to handle it properly upstream
+        }
+    }
+
+    public String generateTestToken(String username){
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
     }
 }

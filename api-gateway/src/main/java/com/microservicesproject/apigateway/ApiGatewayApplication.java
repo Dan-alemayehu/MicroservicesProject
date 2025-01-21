@@ -1,13 +1,21 @@
 package com.microservicesproject.apigateway;
 
+import com.microservicesproject.apigateway.util.JwtUtils;
+import io.jsonwebtoken.Jwts;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
 @EnableEurekaClient
 public class ApiGatewayApplication {
     public static void main(String[] args) {
-        SpringApplication.run(ApiGatewayApplication.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(ApiGatewayApplication.class, args);
+
+        JwtUtils jwtUtils = context.getBean(JwtUtils.class);
+        String testToken = jwtUtils.generateTestToken("johnathan_Doe");
+        System.out.println("Generated Test JWT Token: " + testToken);
+
     }
 }
