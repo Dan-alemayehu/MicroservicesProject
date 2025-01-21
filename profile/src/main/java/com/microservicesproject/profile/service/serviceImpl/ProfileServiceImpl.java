@@ -9,6 +9,7 @@ import org.springframework.boot.context.config.ConfigDataResourceNotFoundExcepti
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,6 +30,11 @@ public class ProfileServiceImpl implements ProfileService {
     public Profile getProfileById(Long id) {
         return profileRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id: " + id));
+    }
+
+    @Override
+    public List<Profile> getAllProfiles() {
+        return profileRepository.findAll();
     }
 
     @Override

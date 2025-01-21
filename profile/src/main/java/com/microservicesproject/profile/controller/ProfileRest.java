@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,6 +24,17 @@ public class ProfileRest {
     public ResponseEntity<Profile> getProfileById(@PathVariable Long id) {
         log.info("Get profile with id {}", id);
         return ResponseEntity.ok(profileService.getProfileById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Profile>> getAllProfiles() {
+        List<Profile> profiles = profileService.getAllProfiles();
+        if (profiles.isEmpty()) {
+            // Return a 204 No Content if no profiles are found
+            return ResponseEntity.noContent().build();
+        }
+        // Return the profiles with a 200 OK status
+        return ResponseEntity.ok(profiles);
     }
 
     @GetMapping("/username/{username}")
